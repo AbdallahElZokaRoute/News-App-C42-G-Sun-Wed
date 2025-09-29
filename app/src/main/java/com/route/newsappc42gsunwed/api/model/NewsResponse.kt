@@ -10,6 +10,9 @@ data class NewsResponse(
     @field:SerializedName("articles")
     val articles: List<ArticlesItemDM>? = null,
 
+    @field:SerializedName("message")
+    val message: String? = null,
+
     @field:SerializedName("status")
     val status: String? = null
 )

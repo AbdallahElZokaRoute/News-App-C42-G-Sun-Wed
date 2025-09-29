@@ -1,5 +1,6 @@
 package com.route.newsappc42gsunwed.ui.screens.news
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,7 +71,7 @@ fun SourcesTabRow(
     modifier: Modifier = Modifier,
     viewModel: NewsViewModel,
 ) {
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) { //
         viewModel.getSources(categoryApiId)
     }
     var selectedIndex by remember { mutableIntStateOf(-1) }
@@ -79,6 +81,11 @@ fun SourcesTabRow(
             selectedIndex = 0
         }
     }
+    val selectedId = viewModel.selectedSourceId.collectAsStateWithLifecycle().value
+    LaunchedEffect(selectedId) {
+        if (selectedId.isNotEmpty())
+            viewModel.getNewsBySourceId(selectedId)
+    }
     LazyRow(modifier) {
         itemsIndexed(viewModel.sourcesList) { index, item ->
             SourcesItem(item, index, selectedIndex) { clickedIndex, sourcesItem ->
@@ -86,6 +93,12 @@ fun SourcesTabRow(
                 viewModel.selectedSourceId.value = (sourcesItem.id ?: "")
             }
         }
+    }
+    if (viewModel.sourcesError.value.isNotEmpty()) {
+        Toast.makeText(LocalContext.current, viewModel.sourcesError.value, Toast.LENGTH_LONG).show()
+    }
+    if (viewModel.articlesError.value.isNotEmpty()) {
+        Toast.makeText(LocalContext.current, viewModel.articlesError.value, Toast.LENGTH_LONG).show()
     }
 }
 
@@ -153,8 +166,8 @@ fun NewsLazyColumn(
     modifier: Modifier = Modifier
 ) {
     val articlesPaginatedList =
-        viewModel.articlesList.collectAsLazyPagingItems().itemSnapshotList
-    LazyColumn {
+        viewModel.articlesList // 10
+    LazyColumn(modifier) {
         items(articlesPaginatedList) {
             NewsCard(it)
         }
@@ -175,6 +188,13 @@ fun NewsCard(articleItem: ArticlesItemDM?, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        //     pagination : {
+        //              page : 1,
+//                  nextPage : 2 ,
+//                  totalPages : 20 ,
+
+        //
+        //     }
 
     ) {
         // Image
@@ -222,5 +242,7 @@ private fun NewsCardPreview() {
         )
     )
 }
-
+// 1- Pagination (Problem )
+// 2- Kotlin Coroutines
+// 3 - Base Resource State Class
 

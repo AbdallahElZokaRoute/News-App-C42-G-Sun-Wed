@@ -13,7 +13,7 @@ class ArticlesPagingSource(val sourceId: String) : PagingSource<Int, ArticlesIte
             Log.e("TAG", "load: $sourceId")
             val response =
                 ApiManager.getNewsService().getNewsBySource(sourceId = sourceId, page = page)
-            val articles = response.articles ?: listOf()
+            val articles = response.body()?.articles ?: listOf()// NewsResponse
             LoadResult.Page(articles, null, page + 1)
         } catch (e: Exception) {
             LoadResult.Error(Throwable(e.message))

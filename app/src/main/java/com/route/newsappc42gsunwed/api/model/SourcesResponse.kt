@@ -7,6 +7,9 @@ data class SourcesResponse(
     @field:SerializedName("sources")
     val sources: List<SourcesItemDM>? = null,
 
+    @field:SerializedName("message")
+    val message: String? = null,
+
     @field:SerializedName("status")
     val status: String? = null
 )
