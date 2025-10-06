@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +29,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +54,8 @@ fun NewsScreen(
     modifier: Modifier = Modifier,
     viewModel: NewsViewModel = viewModel(),
 ) {
+    // 1- Base Resource Model ->
+    // 2- Repository Pattern  (Clean Architecture) ->
     Column(modifier = modifier.fillMaxSize()) {
         SourcesTabRow(categoryAPIId, viewModel = viewModel)           // empty -> list
         Spacer(Modifier.height(8.dp))
@@ -64,20 +69,23 @@ fun NewsScreen(
 private fun NewsScreenPreview() {
     NewsScreen("")
 }
-
+//   SOLID Design Principles
 @Composable
 fun SourcesTabRow(
     categoryApiId: String,
     modifier: Modifier = Modifier,
     viewModel: NewsViewModel,
 ) {
+    val context = LocalContext.current
     LaunchedEffect(Unit) { //
-        viewModel.getSources(categoryApiId)
+        viewModel.getSources(categoryApiId, context)
     }
     var selectedIndex by remember { mutableIntStateOf(-1) }
-    LaunchedEffect(viewModel.sourcesList.isNotEmpty()) {
-        if (viewModel.sourcesList.isNotEmpty()) {
-            viewModel.selectedSourceId.value = (viewModel.sourcesList[0].id ?: "")
+    LaunchedEffect(viewModel.sourcesResource.value) {
+        if (viewModel.sourcesResource.value is Resource.Success) {
+            val successResource =
+                (viewModel.sourcesResource.value as Resource.Success<List<SourcesItemDM>>).data
+            viewModel.selectedSourceId.value = (successResource[0].id ?: "")
             selectedIndex = 0
         }
     }
@@ -86,20 +94,38 @@ fun SourcesTabRow(
         if (selectedId.isNotEmpty())
             viewModel.getNewsBySourceId(selectedId)
     }
-    LazyRow(modifier) {
-        itemsIndexed(viewModel.sourcesList) { index, item ->
-            SourcesItem(item, index, selectedIndex) { clickedIndex, sourcesItem ->
-                selectedIndex = clickedIndex
-                viewModel.selectedSourceId.value = (sourcesItem.id ?: "")
+    val state = viewModel.sourcesResource.value
+    when (state) {
+        is Resource.Initial -> {}
+        is Resource.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+            }
+        }
+
+        is Resource.Error -> {
+            if (state.errorMessage.isNotEmpty()) {
+                Toast.makeText(
+                    LocalContext.current,
+                    state.errorMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        is Resource.Success -> {
+            LazyRow(modifier) {
+                itemsIndexed(state.data) { index, item ->
+                    SourcesItem(item, index, selectedIndex) { clickedIndex, sourcesItem ->
+                        selectedIndex = clickedIndex
+                        viewModel.selectedSourceId.value = (sourcesItem.id ?: "")
+                    }
+                }
             }
         }
     }
-    if (viewModel.sourcesError.value.isNotEmpty()) {
-        Toast.makeText(LocalContext.current, viewModel.sourcesError.value, Toast.LENGTH_LONG).show()
-    }
-    if (viewModel.articlesError.value.isNotEmpty()) {
-        Toast.makeText(LocalContext.current, viewModel.articlesError.value, Toast.LENGTH_LONG).show()
-    }
+
+
 }
 
 @Composable
@@ -165,13 +191,35 @@ fun NewsLazyColumn(
     viewModel: NewsViewModel,
     modifier: Modifier = Modifier
 ) {
-    val articlesPaginatedList =
-        viewModel.articlesList // 10
-    LazyColumn(modifier) {
-        items(articlesPaginatedList) {
-            NewsCard(it)
+    val state = viewModel.articlesResource.value
+    when (state) {
+        is Resource.Initial -> {}
+
+        is Resource.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+            }
+        }
+
+        is Resource.Error -> {
+            if (state.errorMessage.isNotEmpty()) {
+                Toast.makeText(
+                    LocalContext.current,
+                    state.errorMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        is Resource.Success -> {
+            LazyColumn(modifier) {
+                items(state.data) {
+                    NewsCard(it)
+                }
+            }
         }
     }
+
 }
 
 @Preview

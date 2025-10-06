@@ -1,5 +1,7 @@
 package com.route.newsappc42gsunwed.api.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 data class SourcesResponse(
@@ -14,6 +16,7 @@ data class SourcesResponse(
     val status: String? = null
 )
 
+@Entity(tableName = "sources")
 data class SourcesItemDM(
 
     @field:SerializedName("country")
@@ -28,8 +31,9 @@ data class SourcesItemDM(
     @field:SerializedName("language")
     val language: String? = null,
 
+    @PrimaryKey(autoGenerate = false)
     @field:SerializedName("id")
-    val id: String? = null,
+    var id: String = "",
 
     @field:SerializedName("category")
     val category: String? = null,
