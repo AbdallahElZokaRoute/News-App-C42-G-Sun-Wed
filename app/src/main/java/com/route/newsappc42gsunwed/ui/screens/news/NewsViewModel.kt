@@ -1,22 +1,24 @@
 package com.route.newsappc42gsunwed.ui.screens.news
 
-import android.content.Context
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
-import com.route.newsappc42gsunwed.api.ApiManager
-import com.route.newsappc42gsunwed.api.model.ArticlesItemDM
-import com.route.newsappc42gsunwed.api.model.NewsResponse
-import com.route.newsappc42gsunwed.api.model.SourcesItemDM
-import com.route.newsappc42gsunwed.api.model.SourcesResponse
-import com.route.newsappc42gsunwed.ui.repository.NewsRepository
+import com.route.domain.entities.news.ArticlesItemEntity
+import com.route.domain.entities.news.SourcesItemEntity
+import com.route.domain.usecases.news.GetNewsBySourceUseCase
+import com.route.domain.usecases.news.GetSourcesUseCase
+import com.route.domain.utils.base.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NewsViewModel : ViewModel() {
+@HiltViewModel
+class NewsViewModel @Inject constructor(
+    private val getSourcesUseCase: GetSourcesUseCase,
+    private val getNewsBySourceUseCase: GetNewsBySourceUseCase,
+) : ViewModel() {
     val selectedSourceId = MutableStateFlow<String>("")
 
     // Caching   1- (Networking Library -> Retrofit (Search) )
@@ -32,14 +34,14 @@ class NewsViewModel : ViewModel() {
     //                      ( Call API and Store SourcesItemDM )      -> LocalDataSource  (Room)
     //                      (Facebook) ->
     // (2 endpoints )
-    val repository: NewsRepository = NewsRepository()
-    val sourcesResource = mutableStateOf<Resource<List<SourcesItemDM>>>(Resource.Initial())
-    val articlesResource = mutableStateOf<Resource<List<ArticlesItemDM>>>(Resource.Initial())
+    //    val repository: NewsRepository = NewsRepository()
+    val sourcesResource = mutableStateOf<Resource<List<SourcesItemEntity>>>(Resource.Initial())
+    val articlesResource = mutableStateOf<Resource<List<ArticlesItemEntity>>>(Resource.Initial())
 
-    fun getSources(categoryApiId: String, context: Context) {
+    fun getSources(categoryApiId: String) {
         viewModelScope.launch(context = Dispatchers.IO) {
             sourcesResource.value = Resource.Loading()
-            val response = repository.getSources(categoryApiId, context)
+            val response = getSourcesUseCase.invoke(categoryApiId)
             sourcesResource.value = response
         }
     }
@@ -47,21 +49,8 @@ class NewsViewModel : ViewModel() {
     fun getNewsBySourceId(sourceId: String) {
         viewModelScope.launch {
             articlesResource.value = Resource.Loading()
-            try {
-                val response = ApiManager.getNewsService().getNewsBySource(sourceId, 1, 15)
-                if (response.isSuccessful) {
-                    val articles = response.body()?.articles ?: listOf()
-                    articlesResource.value = Resource.Success(articles)
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    val gson = Gson()
-                    val newsResponse = gson.fromJson(errorBody, NewsResponse::class.java)
-                    articlesResource.value =
-                        Resource.Error(newsResponse.message ?: "Something went wrong")
-                }
-            } catch (e: Exception) {
-                articlesResource.value = Resource.Error(e.message ?: "Something went wrong")
-            }
+            val response = getNewsBySourceUseCase.invoke(sourceId)
+            articlesResource.value = response
         }
     }
 }

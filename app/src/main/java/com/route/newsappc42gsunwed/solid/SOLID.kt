@@ -58,21 +58,21 @@ interface NewsRepository {
 
 fun test() {
     val button: ButtonV2
-    button.onClickListener = object : OnClickListener {
-        override fun onClick(view: View?) {
-            TODO("Not yet implemented")
-        }
-    }
-    button.onLongClickListener = object : OnLongClickListener {
-        override fun onLongClick(view: View?) {
-            TODO("Not yet implemented")
-        }
-    }
-    button.onDoubleClickListener = object : OnDoubleClickListener {
-        override fun onDoubleClick(view: View?) {
-            TODO("Not yet implemented")
-        }
-    }
+//    button.onClickListener = object : OnClickListener {
+//        override fun onClick(view: View?) {
+//            TODO("Not yet implemented")
+//        }
+//    }
+//    button.onLongClickListener = object : OnLongClickListener {
+//        override fun onLongClick(view: View?) {
+//            TODO("Not yet implemented")
+//        }
+//    }
+//    button.onDoubleClickListener = object : OnDoubleClickListener {
+//        override fun onDoubleClick(view: View?) {
+//            TODO("Not yet implemented")
+//        }
+//    }
 }
 
 class ButtonV2() {
@@ -136,7 +136,7 @@ class CustomFileLogger() : FileLogger() {
 interface LoginService {
     fun loginWithEmailAndPassword(email: String, password: String)
 }
-//  1- Adapter (on Click Listener / callbacks )
-//  2- MVVM (Fragment/Activity/Composable)
-//              Handle Interaction
-//          Call API / Query from Database
+
+// Clean Architecture (Onion architecture)
+
+

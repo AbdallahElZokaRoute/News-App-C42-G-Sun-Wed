@@ -3,16 +3,15 @@ package com.route.newsappc42gsunwed.paging
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.route.newsappc42gsunwed.api.ApiManager
-import com.route.newsappc42gsunwed.api.model.ArticlesItemDM
+import com.route.domain.entities.news.ArticlesItemEntity
 
-class ArticlesPagingSource(val sourceId: String) : PagingSource<Int, ArticlesItemDM>() {
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ArticlesItemDM> {
+/*class ArticlesPagingSource(val sourceId: String) : PagingSource<Int, ArticlesItemEntity>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ArticlesItemEntity> {
         val page = params.key ?: 1
         return try {
             Log.e("TAG", "load: $sourceId")
             val response =
-                ApiManager.getNewsService().getNewsBySource(sourceId = sourceId, page = page)
+                ApiManager.getNewsService().getNewsBySource(sourceId = sourceId)
             val articles = response.body()?.articles ?: listOf()// NewsResponse
             LoadResult.Page(articles, null, page + 1)
         } catch (e: Exception) {
@@ -26,6 +25,4 @@ class ArticlesPagingSource(val sourceId: String) : PagingSource<Int, ArticlesIte
             anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
         }
     }
-
-
-}
+}*/

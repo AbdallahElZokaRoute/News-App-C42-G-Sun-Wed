@@ -23,7 +23,9 @@ import com.route.newsappc42gsunwed.ui.routes.NewsDestination
 import com.route.newsappc42gsunwed.ui.screens.categories.CategoriesScreen
 import com.route.newsappc42gsunwed.ui.screens.news.NewsScreen
 import com.route.newsappc42gsunwed.ui.theme.NewsAppC42GSunWedTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

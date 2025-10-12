@@ -216,3 +216,14 @@ fun CategoriesList(navHostController: NavHostController, modifier: Modifier = Mo
         }
     }
 }
+/**
+ *              Module-Based Clean Architecture vs     Package-Based Clean Architecture
+ *       Project Visibility (                                  Dependency Injection
+ *                  App -> Domain
+ *                  Data -> Domain
+ *       App Layer -> (Animations)                             Room  or   Retrofit
+ *
+ *       Build
+ *       )
+ *                                  Domain -> Contracts of The App
+ */
